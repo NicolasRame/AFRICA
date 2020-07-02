@@ -3,11 +3,16 @@ from zipfile import ZipFile
 import json
 import re
 import wptools
+#chemin
+import os
+os.chdir('C:\\Users\\Public\python')
+cwd = os.getcwd()
 
+##
 conn = sqlite3.connect('pays.sqlite')
 
 
-def init_db(continent):
+def create_table(continent):
     with ZipFile('{}.zip'.format(continent), 'r') as z:
         files = z.namelist()
         for f in files:
@@ -107,6 +112,32 @@ def get_currency(wp_info):
             return currency
     return None
 
+def get_population(wp_info):
+    if 'population_census' in wp_info:
+        population = wp_info['population_census']  # type: str
+        population = population.replace(',', '')
+        population = population.replace(' ', '')
+        population=population.replace('', '')
+        if population == '24905843{{citationneeded|date|=|April2019}}':
+            return 24905843
+        if population == '21397000(52nd)':
+            return 21397000
+        if population == '10515973{{sfn|NationalInstituteofStatisticsofRwanda|2014|p|=|3}}':
+            return 10515973
+        if population == '51770560{{rp|18}}':
+            return 51770560
+        if wp_info['common_name']=='South Sudan':
+            return 51770560
+        if wp_info['common_name']=='Sudan':
+            return 30894000
+        else :
+            population_int = int(population)
+            population = f'{population_int:,}'
+            return population
+
+    else:
+        print('Error fetching population')
+        return None
 
 def get_superficie(wp_info):
     if 'area_km2' in wp_info:
@@ -119,8 +150,33 @@ def get_superficie(wp_info):
     else:
         print('Error fetching superficie')
         return None
+    
+def get_density(wp_info):
+    if 'population_density_km2' in wp_info:
+        density = wp_info['population_density_km2']  # type: str
+        density = density.replace('.',',')
+        return density
+    else:
+        print('Error fetching density')
+        return None
 
+    def get_hdi(wp_info):
+    if 'HDI' in wp_info:
+        hdi = wp_info['HDI']  # type: str
+        hdi = hdi.replace('.',',')
+        return hdi
+    else:
+        print('Error fetching hdi')
+        return None
 
+def get_growth_hdi(wp_info):
+    if 'HDI_change' in wp_info:
+        hdi_change = wp_info['HDI_change']  # type: str
+        return hdi_change
+    else:
+        print('Error fetching hdi_change')
+        return None
+ 
 def get_government_type(wp_info):
     if 'government_type' in wp_info:
         government_type = wp_info['government_type']  # type: str
@@ -135,6 +191,14 @@ def get_government_type(wp_info):
     print('Error fetching Government type')
     return None
 
+def get_GDPh(wp_info):
+    if 'GDP_nominal_per_capita' in wp_info:
+        GDPh = wp_info['GDP_nominal_per_capita']  # type: str
+        return GDPh
+    else:
+        print('Error fetching GDPh')
+        return None
+    
 def get_GDP_PPP_per_capita(wp_info):
     if 'GDP_PPP_per_capita' in wp_info:
         GDP_PPP_per_capita=wp_info['GDP_PPP_per_capita']
